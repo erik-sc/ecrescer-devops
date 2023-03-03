@@ -1,0 +1,55 @@
+version: "3.8"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-db
+    environment:
+      - MYSQL_DATABASE=mydb
+      - MYSQL_ROOT_PASSWORD=meusecret123
+    volumes:
+      - db-data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - wordpress
+      - webserver
+
+  webserver:
+    container_name: webserver
+    image: nginx:alpine
+    volumes:
+      - wordpress:/var/www/html
+      - nginx:/etc/nginx/conf.d
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - wordpress
+      - mysql
+
+  wordpress:
+    image: wordpress:5.1.1-fpm-alpine
+    container_name: wordpress
+    volumes:
+      - wordpress:/var/www/html
+    environment:
+      - WORDPRESS_DB_USER=admin
+      - WORDPRESS_DB_PASSWORD=aquelasenhatop 
+      - WORDPRESS_DB_NAME=mydb
+      - mysql.uri=mysql://root:password@mysql:3306
+    networks:
+      - webserver
+      - mysql
+    # depends_on:
+    #   - mysql
+
+volumes:
+  db-data:
+  wordpress:
+  nginx:
+
+networks:
+  mysql:
+  wordpress:
+  webserver:
